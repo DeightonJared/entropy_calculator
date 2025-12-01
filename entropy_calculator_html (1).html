@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entropy Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 600px;
+    }
+    .prob-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    input {
+      width: 120px;
+      padding: 8px;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      width: 100%;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background: #0077ff;
+      color: white;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    /* Mobile-friendly adjustments */
+    @media (max-width: 480px) {
+      .prob-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      input {
+        width: 100%;
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>Entropy Calculator</h2>
+  <p>Enter up to 10 probabilities (they should sum to 1):</p>
+
+  <div id="inputs"></div>
+
+  <button onclick="computeEntropy()">Compute Entropy</button>
+
+  <div id="result"></div>
+
+  <script>
+    const container = document.getElementById("inputs");
+    for (let i = 1; i <= 10; i++) {
+      const row = document.createElement("div");
+      row.className = "prob-row";
+      row.innerHTML = `p${i}: <input type="text" id="p${i}" placeholder="e.g. 0.2 or 1/5">`;
+      container.appendChild(row);
+    }
+
+    function computeEntropy() {
+      function parseProb(val) {
+        if (val.includes('/')) {
+          const parts = val.split('/');
+          const num = parseFloat(parts[0]);
+          const den = parseFloat(parts[1]);
+          if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
+        }
+        return parseFloat(val);
+      }
+
+      let probs = [];
+      for (let i = 1; i <= 10; i++) {
+        let raw = document.getElementById("p" + i).value.trim();
+        if (raw === "") continue;
+        let val = parseProb(raw);
+        if (!isNaN(val) && val > 0) probs.push(val);
+      }
+
+      let sum = probs.reduce((a, b) => a + b, 0);
+      if (Math.abs(sum - 1) > 1e-6) {
+        document.getElementById("result").textContent = "Probabilities must sum to 1.";
+        return;
+      }
+
+      let H = 0;
+      for (let p of probs) H -= p * Math.log2(p);
+
+      document.getElementById("result").textContent = "Entropy: " + H.toFixed(4) + " bits";
+    }
+  </script>
+</body>
+</html>
